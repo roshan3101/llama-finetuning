@@ -168,22 +168,6 @@ python training/train.py \
     --resume_from_checkpoint ./outputs/llama3.2-1b-finetuned/checkpoint-1000
 ```
 
-#### Training on Google Cloud Platform (GCP)
-
-For training larger models (8B, 70B) or longer training runs:
-
-**See `GCP_SETUP_GUIDE.md` for complete step-by-step instructions.**
-
-**Quick start:**
-1. Create VM with GPU (T4 or A100) in GCP Console
-2. Connect via SSH
-3. Run setup script: `bash scripts/setup_gcp.sh`
-4. Upload code and prepare data
-5. Start training: `bash scripts/start_training_gcp.sh 8B`
-6. Monitor: `screen -r training` or `tail -f training.log`
-
-**Cost**: ~$0.73/hour for T4 GPU + n1-standard-8 (well within $300 free credits!)
-
 #### Training on Google Colab
 
 1. Upload the project to Google Drive or clone from GitHub
@@ -385,5 +369,3 @@ For issues or questions:
 
 **Note**: This pipeline focuses on training and evaluation only. Inference hosting and API deployment are separate concerns and not included in this codebase.
 
-#   l l a m a - f i n e t u n i n g  
- 

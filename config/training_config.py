@@ -90,10 +90,12 @@ def get_training_config_for_model_size(
         base_config.max_seq_length = 2048
         base_config.learning_rate = 3e-4  # Slightly higher LR for smaller model
     elif model_size == "8B":
-        base_config.per_device_train_batch_size = 4  # Reduced for 8B model on T4 GPU
-        base_config.gradient_accumulation_steps = 4  # Increased to maintain effective batch size
-        base_config.max_seq_length = 2048
-        base_config.learning_rate = 2e-4  # Standard for 8B LoRA
+        # Optimized for Colab Pro (adjust based on GPU)
+        # For T4 (16GB): batch_size=1, grad_accum=16
+        # For V100/A100 (32GB+): batch_size=4, grad_accum=4
+        base_config.per_device_train_batch_size = 2  # Conservative for Colab
+        base_config.gradient_accumulation_steps = 8  # Effective batch size = 16
+        base_config.max_seq_length = 1536  # Slightly reduced for memory
     elif model_size == "70B":
         base_config.per_device_train_batch_size = 1
         base_config.gradient_accumulation_steps = 16
