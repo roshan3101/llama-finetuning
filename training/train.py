@@ -78,11 +78,43 @@ def main(
     # Setup logging
     setup_logging()
     
-    # Load configurations
+    # Auto-detect GPU and memory for optimization
+    gpu_memory_gb = None
+    gpu_name = None
+    if torch.cuda.is_available():
+        gpu_name = torch.cuda.get_device_name(0)
+        gpu_memory_gb = torch.cuda.get_device_properties(0).total_memory / 1e9
+        logger.info(f"Detected GPU: {gpu_name}")
+        logger.info(f"GPU Memory: {gpu_memory_gb:.1f} GB")
+        
+        # Log A100 detection
+        if "A100" in gpu_name or gpu_memory_gb >= 40:
+            logger.info("🚀 A100 GPU detected - Applying high-performance optimizations!")
+            logger.info("   - Large batch size (8 for 8B model)")
+            logger.info("   - bfloat16 precision (faster than fp16)")
+            logger.info("   - Optimized data loading (4 workers)")
+            logger.info("   - Full sequence length (2048 tokens)")
+    
+    # Load configurations with GPU-aware optimization
     model_config = get_model_config(model_size)
-    training_config = get_training_config_for_model_size(model_size)
+    training_config = get_training_config_for_model_size(model_size, gpu_memory_gb=gpu_memory_gb)
     training_config.output_dir = output_dir
     paths_config = get_paths_config()
+    
+    # Set model compute dtype to bfloat16 if using bf16 training (for A100)
+    if training_config.bf16:
+        model_config.bnb_4bit_compute_dtype = "bfloat16"
+        logger.info("Using bfloat16 compute dtype for quantization (A100 optimized)")
+    
+    # Log training configuration
+    logger.info("Training Configuration:")
+    logger.info(f"  Batch size: {training_config.per_device_train_batch_size}")
+    logger.info(f"  Gradient accumulation: {training_config.gradient_accumulation_steps}")
+    logger.info(f"  Effective batch size: {training_config.per_device_train_batch_size * training_config.gradient_accumulation_steps}")
+    logger.info(f"  Max sequence length: {training_config.max_seq_length}")
+    logger.info(f"  Precision: {'bf16' if training_config.bf16 else 'fp16' if training_config.fp16 else 'fp32'}")
+    logger.info(f"  Optimizer: {training_config.optim}")
+    logger.info(f"  Data loader workers: {getattr(training_config, 'dataloader_num_workers', 0)}")
     
     # Set HF token if provided
     if hf_token:

@@ -19,17 +19,17 @@ drive.mount('/content/drive')
 
 **Option A: Clone from GitHub** (if you've pushed to GitHub):
 ```python
-!cd /content/drive/MyDrive && git clone https://github.com/your-username/Career_guidance.git
+!cd /content/drive/MyDrive && git clone https://github.com/your-username/llama-finetuning.git
 ```
 
 **Option B: Upload files directly**:
-- Upload the entire project folder to `/content/drive/MyDrive/Career_guidance/`
+- Upload the entire project folder to `/content/drive/MyDrive/llama-finetuning/`
 - Or use Colab's file upload feature
 
 5. **Navigate to project**:
 ```python
 import os
-os.chdir('/content/drive/MyDrive/Career_guidance')
+os.chdir('/content/drive/MyDrive/llama-finetuning')
 ```
 
 ### Step 2: Run Setup Script
@@ -55,7 +55,7 @@ from google.colab import drive
 drive.mount('/content/drive')
 
 # Set project root
-project_root = "/content/drive/MyDrive/Career_guidance"
+project_root = "/content/drive/MyDrive/llama-finetuning"
 os.chdir(project_root)
 
 # Create directories
@@ -129,8 +129,8 @@ Should show all checks passing.
 ### Paths Configuration
 
 The code automatically detects Colab and adjusts paths. Files will be saved to:
-- **With Drive mounted**: `/content/drive/MyDrive/Career_guidance/outputs/`
-- **Without Drive**: `/content/Career_guidance/outputs/` (⚠️ lost when session ends)
+- **With Drive mounted**: `/content/drive/MyDrive/llama-finetuning/outputs/`
+- **Without Drive**: `/content/llama-finetuning/outputs/` (⚠️ lost when session ends)
 
 ### Persistent Storage
 
@@ -149,7 +149,7 @@ drive.mount('/content/drive')
 ### Checkpoint Saving
 
 Checkpoints are automatically saved to Drive (if mounted):
-- Location: `/content/drive/MyDrive/Career_guidance/outputs/checkpoint-XXX/`
+- Location: `/content/drive/MyDrive/llama-finetuning/outputs/checkpoint-XXX/`
 - Saves every 500 steps (configurable)
 - Keeps last 3 checkpoints
 
@@ -242,7 +242,7 @@ files.download('model_checkpoint.zip')
 ### Save to Drive (Automatic)
 
 If Drive is mounted, everything saves automatically to:
-- `/content/drive/MyDrive/Career_guidance/outputs/`
+- `/content/drive/MyDrive/llama-finetuning/outputs/`
 
 ## 🔄 Complete Colab Workflow
 
@@ -338,7 +338,7 @@ import sys
 from pathlib import Path
 
 # Set project root
-project_root = "/content/drive/MyDrive/Career_guidance"
+project_root = "/content/drive/MyDrive/llama-finetuning"
 os.chdir(project_root)
 sys.path.insert(0, project_root)
 
@@ -418,10 +418,10 @@ login(token=os.environ['HF_TOKEN'])
 
 ### File Locations
 
-- **Project**: `/content/drive/MyDrive/Career_guidance/`
-- **Outputs**: `/content/drive/MyDrive/Career_guidance/outputs/`
-- **Logs**: `/content/drive/MyDrive/Career_guidance/logs/`
-- **Data**: `/content/drive/MyDrive/Career_guidance/data/processed/`
+- **Project**: `/content/drive/MyDrive/llama-finetuning/`
+- **Outputs**: `/content/drive/MyDrive/llama-finetuning/outputs/`
+- **Logs**: `/content/drive/MyDrive/llama-finetuning/logs/`
+- **Data**: `/content/drive/MyDrive/llama-finetuning/data/processed/`
 
 ## 💡 Tips for Colab
 

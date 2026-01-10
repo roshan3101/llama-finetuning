@@ -11,7 +11,7 @@ drive.mount('/content/drive')
 
 import os, sys
 from pathlib import Path
-os.chdir("/content/drive/MyDrive/Career_guidance")
+os.chdir("/content/drive/MyDrive/llama-finetuning")
 sys.path.insert(0, os.getcwd())
 print(f"✓ {os.getcwd()}")
 ```

@@ -121,6 +121,9 @@ def create_training_arguments(
                 logger.warning("Weights & Biases not installed. Setting report_to to None. Install with: pip install wandb")
                 report_to = None
     
+    # Get save_strategy (default to "steps" if not set)
+    save_strategy = getattr(training_config, 'save_strategy', 'steps')
+    
     training_args = TrainingArguments(
         output_dir=training_config.output_dir,
         num_train_epochs=training_config.num_train_epochs,
@@ -135,6 +138,7 @@ def create_training_arguments(
         max_grad_norm=training_config.max_grad_norm,
         logging_steps=training_config.logging_steps,
         save_steps=training_config.save_steps,
+        save_strategy=save_strategy,  # Explicitly set save strategy
         eval_steps=training_config.eval_steps,
         save_total_limit=training_config.save_total_limit,
         eval_strategy=eval_strategy,  # Changed from evaluation_strategy to eval_strategy
@@ -144,6 +148,7 @@ def create_training_arguments(
         fp16=training_config.fp16,
         bf16=training_config.bf16,
         dataloader_pin_memory=training_config.dataloader_pin_memory,
+        dataloader_num_workers=getattr(training_config, 'dataloader_num_workers', 0),
         remove_unused_columns=training_config.remove_unused_columns,
         seed=training_config.seed,
         report_to=report_to,  # Will be None if tensorboard/wandb not installed

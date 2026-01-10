@@ -15,7 +15,7 @@ import os
 import sys
 from pathlib import Path
 
-project_root = "/content/drive/MyDrive/Career_guidance"
+project_root = "/content/drive/MyDrive/llama-finetuning"
 Path(project_root).mkdir(parents=True, exist_ok=True)
 os.chdir(project_root)
 sys.path.insert(0, project_root)
@@ -176,7 +176,7 @@ from google.colab import drive
 drive.mount('/content/drive')
 import os, sys
 from pathlib import Path
-os.chdir("/content/drive/MyDrive/Career_guidance")
+os.chdir("/content/drive/MyDrive/llama-finetuning")
 sys.path.insert(0, os.getcwd())
 
 # 2. Install

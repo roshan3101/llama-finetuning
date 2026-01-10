@@ -17,7 +17,7 @@ class TrainingConfig:
     output_dir: str = "./outputs"
     
     # Training hyperparameters
-    num_train_epochs: int = 3
+    num_train_epochs: int = 2  # Reduced to 2 epochs
     per_device_train_batch_size: int = 4  # Adjust based on GPU memory
     per_device_eval_batch_size: int = 4
     gradient_accumulation_steps: int = 4  # Effective batch size = batch_size * gradient_accumulation_steps
@@ -34,9 +34,10 @@ class TrainingConfig:
     
     # Logging and saving
     logging_steps: int = 10
-    save_steps: int = 500
-    eval_steps: int = 500
-    save_total_limit: int = 3  # Keep only last 3 checkpoints
+    save_steps: int = 100  # Save checkpoint every 100 steps (reduced from 500 for Colab stability)
+    eval_steps: int = 100  # Evaluate every 100 steps (aligned with save_steps)
+    save_total_limit: int = 5  # Keep last 5 checkpoints (increased to preserve more checkpoints)
+    save_strategy: str = "steps"  # Explicitly set to save by steps
     
     # Evaluation
     evaluation_strategy: str = "steps"  # "no", "steps", or "epoch" (deprecated, use eval_strategy)
@@ -49,6 +50,7 @@ class TrainingConfig:
     fp16: bool = True  # Use mixed precision (set to False if using bfloat16)
     bf16: bool = False  # Use bfloat16 (preferred for newer GPUs, but requires fp16=False)
     dataloader_pin_memory: bool = True
+    dataloader_num_workers: int = 0  # Number of workers for data loading (0 = main process, 4+ for faster loading)
     remove_unused_columns: bool = False
     
     # Seed for reproducibility
@@ -110,6 +112,24 @@ def get_training_config_for_model_size(
         elif gpu_memory_gb < 24:
             base_config.per_device_train_batch_size = 2
             base_config.gradient_accumulation_steps = 4
+        elif gpu_memory_gb >= 40:  # A100 (40GB+)
+            # Optimize for A100 with high RAM
+            if model_size == "8B":
+                base_config.per_device_train_batch_size = 8  # Large batch for A100
+                base_config.gradient_accumulation_steps = 2  # Reduced since batch is larger
+                base_config.max_seq_length = 2048  # Full sequence length
+                base_config.bf16 = True  # Use bfloat16 (faster on A100)
+                base_config.fp16 = False  # Disable fp16 when using bf16
+                base_config.optim = "adamw_torch"  # Faster optimizer for A100
+                base_config.dataloader_num_workers = 4  # Faster data loading
+            elif model_size == "1B":
+                base_config.per_device_train_batch_size = 32  # Very large batch for 1B on A100
+                base_config.gradient_accumulation_steps = 1
+                base_config.max_seq_length = 2048
+                base_config.bf16 = True
+                base_config.fp16 = False
+                base_config.optim = "adamw_torch"
+                base_config.dataloader_num_workers = 4
     
     return base_config
 

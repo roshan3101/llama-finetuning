@@ -29,11 +29,11 @@ def setup_colab():
     # Set project path
     if drive_mounted:
         # Option 1: Use Drive (persistent storage)
-        project_root = "/content/drive/MyDrive/Career_guidance"
+        project_root = "/content/drive/MyDrive/llama-finetuning"
         print(f"✓ Using Drive path: {project_root}")
     else:
         # Option 2: Use Colab's /content (temporary)
-        project_root = "/content/Career_guidance"
+        project_root = "/content/llama-finetuning"
         print(f"⚠ Using temporary path: {project_root}")
     
     # Change to project directory

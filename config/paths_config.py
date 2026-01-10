@@ -67,9 +67,9 @@ class PathsConfig:
             if is_colab:
                 # Check if Drive is mounted
                 if os.path.exists('/content/drive/MyDrive'):
-                    self.project_root = "/content/drive/MyDrive/Career_guidance"
+                    self.project_root = "/content/drive/MyDrive/llama-finetuning"
                 else:
-                    self.project_root = "/content/Career_guidance"
+                    self.project_root = "/content/llama-finetuning"
             else:
                 self.project_root = "."
         
