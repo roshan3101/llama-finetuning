@@ -122,13 +122,14 @@ def load_model(
     return model
 
 
-def prepare_model_for_training(model, model_config: ModelConfig):
+def prepare_model_for_training(model, model_config: ModelConfig, enable_gradient_checkpointing: bool = True):
     """
     Prepare model for k-bit training (required for QLoRA).
     
     Args:
         model: Loaded model
         model_config: Model configuration
+        enable_gradient_checkpointing: Whether to enable gradient checkpointing (saves memory but slows training)
     
     Returns:
         Prepared model
@@ -137,10 +138,15 @@ def prepare_model_for_training(model, model_config: ModelConfig):
     
     model = prepare_model_for_kbit_training(model)
     
-    # Enable gradient checkpointing for memory efficiency
-    if hasattr(model, "gradient_checkpointing_enable"):
-        model.gradient_checkpointing_enable()
-        logger.info("Gradient checkpointing enabled")
+    # Enable/disable gradient checkpointing based on config
+    if enable_gradient_checkpointing:
+        if hasattr(model, "gradient_checkpointing_enable"):
+            model.gradient_checkpointing_enable()
+            logger.info("Gradient checkpointing enabled (memory-efficient mode)")
+    else:
+        if hasattr(model, "gradient_checkpointing_disable"):
+            model.gradient_checkpointing_disable()
+        logger.info("Gradient checkpointing disabled (speed-optimized mode)")
     
     logger.info("Model prepared for training")
     

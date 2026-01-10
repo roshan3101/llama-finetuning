@@ -65,6 +65,10 @@ class TrainingConfig:
     # Maximum sequence length
     max_seq_length: int = 2048  # Adjust based on model and memory constraints
     
+    # Gradient checkpointing (saves memory but slows training)
+    # Disable for high-memory setups to speed up training
+    gradient_checkpointing: bool = True  # Set to False for 80GB+ GPUs for faster training
+    
     # Packing (for efficiency, but requires custom data collator)
     packing: bool = False
 
@@ -112,7 +116,46 @@ def get_training_config_for_model_size(
         elif gpu_memory_gb < 24:
             base_config.per_device_train_batch_size = 2
             base_config.gradient_accumulation_steps = 4
-        elif gpu_memory_gb >= 40:  # A100 (40GB+)
+        elif gpu_memory_gb >= 70:  # A100 80GB or similar (EXTREME performance mode)
+            # Ultra-high performance for massive GPU memory
+            if model_size == "8B":
+                base_config.per_device_train_batch_size = 24  # Very large batch (3x A100 40GB)
+                base_config.per_device_eval_batch_size = 32  # Even larger for eval
+                base_config.gradient_accumulation_steps = 1  # No accumulation needed
+                base_config.max_seq_length = 2048  # Full sequence length
+                base_config.bf16 = True  # Use bfloat16 (faster on A100)
+                base_config.fp16 = False  # Disable fp16 when using bf16
+                base_config.optim = "adamw_torch"  # Faster optimizer
+                base_config.dataloader_num_workers = 16  # Maximum data loading speed
+                base_config.dataloader_pin_memory = True  # Faster GPU transfer
+                base_config.gradient_checkpointing = False  # Disable for speed (plenty of memory)
+                base_config.logging_steps = 20  # Less frequent logging to reduce overhead
+                base_config.eval_steps = 200  # Less frequent eval to reduce overhead
+            elif model_size == "1B":
+                base_config.per_device_train_batch_size = 64  # Massive batch for 1B
+                base_config.per_device_eval_batch_size = 128
+                base_config.gradient_accumulation_steps = 1
+                base_config.max_seq_length = 2048
+                base_config.bf16 = True
+                base_config.fp16 = False
+                base_config.optim = "adamw_torch"
+                base_config.dataloader_num_workers = 16
+                base_config.gradient_checkpointing = False  # Disable for speed
+                base_config.logging_steps = 20
+                base_config.eval_steps = 200
+            elif model_size == "70B":
+                base_config.per_device_train_batch_size = 4  # Large batch even for 70B
+                base_config.per_device_eval_batch_size = 8
+                base_config.gradient_accumulation_steps = 2  # Still some accumulation for 70B
+                base_config.max_seq_length = 2048  # Full length even for 70B
+                base_config.bf16 = True
+                base_config.fp16 = False
+                base_config.optim = "adamw_torch"
+                base_config.dataloader_num_workers = 16
+                base_config.gradient_checkpointing = False  # Disable for speed
+                base_config.logging_steps = 20
+                base_config.eval_steps = 200
+        elif gpu_memory_gb >= 40:  # A100 40GB (standard high performance)
             # Optimize for A100 with high RAM
             if model_size == "8B":
                 base_config.per_device_train_batch_size = 8  # Large batch for A100

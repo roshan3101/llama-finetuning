@@ -87,8 +87,17 @@ def main(
         logger.info(f"Detected GPU: {gpu_name}")
         logger.info(f"GPU Memory: {gpu_memory_gb:.1f} GB")
         
-        # Log A100 detection
-        if "A100" in gpu_name or gpu_memory_gb >= 40:
+        # Log GPU detection and optimizations
+        if gpu_memory_gb >= 70:  # 70GB+ catches A100 80GB and similar
+            logger.info("🚀🚀 EXTREME PERFORMANCE MODE - 80GB+ GPU DETECTED!")
+            logger.info("   - Ultra-large batch size (24 for 8B model)")
+            logger.info("   - No gradient accumulation (batch size is large enough)")
+            logger.info("   - bfloat16 precision (faster than fp16)")
+            logger.info("   - Maximum data loading (16 workers)")
+            logger.info("   - Gradient checkpointing DISABLED (for maximum speed)")
+            logger.info("   - Full sequence length (2048 tokens)")
+            logger.info("   - Expected: 2-3x faster than standard A100!")
+        elif "A100" in gpu_name or gpu_memory_gb >= 40:
             logger.info("🚀 A100 GPU detected - Applying high-performance optimizations!")
             logger.info("   - Large batch size (8 for 8B model)")
             logger.info("   - bfloat16 precision (faster than fp16)")
@@ -109,12 +118,15 @@ def main(
     # Log training configuration
     logger.info("Training Configuration:")
     logger.info(f"  Batch size: {training_config.per_device_train_batch_size}")
+    logger.info(f"  Eval batch size: {training_config.per_device_eval_batch_size}")
     logger.info(f"  Gradient accumulation: {training_config.gradient_accumulation_steps}")
     logger.info(f"  Effective batch size: {training_config.per_device_train_batch_size * training_config.gradient_accumulation_steps}")
     logger.info(f"  Max sequence length: {training_config.max_seq_length}")
     logger.info(f"  Precision: {'bf16' if training_config.bf16 else 'fp16' if training_config.fp16 else 'fp32'}")
     logger.info(f"  Optimizer: {training_config.optim}")
     logger.info(f"  Data loader workers: {getattr(training_config, 'dataloader_num_workers', 0)}")
+    logger.info(f"  Gradient checkpointing: {getattr(training_config, 'gradient_checkpointing', True)}")
+    logger.info(f"  Epochs: {training_config.num_train_epochs}")
     
     # Set HF token if provided
     if hf_token:
@@ -139,7 +151,8 @@ def main(
     
     # Prepare model for training
     logger.info("Step 3: Preparing model for training...")
-    model = prepare_model_for_training(model, model_config)
+    enable_gradient_checkpointing = getattr(training_config, 'gradient_checkpointing', True)
+    model = prepare_model_for_training(model, model_config, enable_gradient_checkpointing=enable_gradient_checkpointing)
     
     # Apply LoRA
     logger.info("Step 4: Applying LoRA adapters...")
