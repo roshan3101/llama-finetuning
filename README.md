@@ -246,12 +246,30 @@ python export/merge_lora.py \
 
 #### Push to Hugging Face Hub
 
+**📖 See [HUGGINGFACE_PUSH_GUIDE.md](HUGGINGFACE_PUSH_GUIDE.md) for complete instructions!**
+
+Quick start:
 ```bash
+# Set your token (one-time)
+export HF_TOKEN="your_huggingface_token_here"
+
+# Push LoRA adapters (recommended - smaller size)
+python export/push_to_huggingface.py \
+    --model_path ./outputs/checkpoint-7000 \
+    --repo_id your-username/your-model-name
+
+# Or push merged model
 python export/push_to_huggingface.py \
     --model_path ./outputs/merged_model \
-    --repo_id your-username/llama3.2-1b-emotional-career \
-    --token $HF_TOKEN
+    --repo_id your-username/your-model-name-merged
 ```
+
+**What you need:**
+- ✅ Hugging Face account + Write token (get from https://huggingface.co/settings/tokens)
+- ✅ Trained model checkpoint or merged model
+- ✅ Repository name (username/model-name)
+
+See the guide for detailed instructions, troubleshooting, and file requirements.
 
 ## Configuration
 

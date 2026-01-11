@@ -60,19 +60,66 @@ def push_to_hub(
             logger.error("Please set HF_TOKEN environment variable or provide token")
             raise
     
-    # Create repository if it doesn't exist
+    # Check if repository exists and handle creation
     api = HfApi()
+    repo_exists = False
+    
+    # Try to check if repo exists
     try:
-        api.create_repo(
-            repo_id=repo_id,
-            private=private,
-            exist_ok=True,
-        )
-        logger.info(f"Repository {repo_id} ready")
-    except Exception as e:
-        logger.warning(f"Could not create repository (may already exist): {e}")
+        api.model_info(repo_id=repo_id)
+        repo_exists = True
+        logger.info(f"Repository {repo_id} already exists")
+    except Exception:
+        # Repository doesn't exist, try to create it
+        logger.info(f"Repository {repo_id} does not exist. Attempting to create...")
+        try:
+            api.create_repo(
+                repo_id=repo_id,
+                private=private,
+                exist_ok=True,
+            )
+            logger.info(f"✅ Repository {repo_id} created successfully")
+            repo_exists = True
+        except Exception as e:
+            error_msg = str(e)
+            # Check for permission errors
+            if "403" in error_msg or "Forbidden" in error_msg or "don't have the rights" in error_msg.lower():
+                logger.error("=" * 50)
+                logger.error("❌ PERMISSION ERROR: Cannot create repository")
+                logger.error("=" * 50)
+                logger.error(f"Your token doesn't have permission to create repos under this namespace.")
+                logger.error("")
+                logger.error("SOLUTIONS:")
+                logger.error("1. Use your personal username instead of organization name:")
+                logger.error(f"   Change: fixacity-roshan/llama3.1-8b-emotional-career")
+                logger.error(f"   To: YOUR-USERNAME/llama3.1-8b-emotional-career")
+                logger.error("")
+                logger.error("2. Get organization permissions:")
+                logger.error("   - Ask organization admin to add you as a member")
+                logger.error("   - Or create the repo manually at https://huggingface.co/new")
+                logger.error("")
+                logger.error("3. Check your username:")
+                logger.error("   - Go to https://huggingface.co/settings/profile")
+                logger.error("   - Use your actual username in the repo_id")
+                logger.error("=" * 50)
+                raise Exception(f"Permission denied: Cannot create repository '{repo_id}'. Use your personal username or get organization permissions.")
+            else:
+                logger.warning(f"Could not create repository: {e}")
+                logger.warning("Attempting to upload anyway (repo may exist)...")
     
     # Upload model
+    if not repo_exists:
+        logger.error("=" * 50)
+        logger.error("❌ Repository does not exist and could not be created")
+        logger.error("=" * 50)
+        logger.error("Please create the repository manually:")
+        logger.error(f"1. Go to https://huggingface.co/new")
+        logger.error(f"2. Create a model repository named: {repo_id.split('/')[-1]}")
+        logger.error(f"3. Under namespace: {repo_id.split('/')[0]}")
+        logger.error(f"4. Then run this script again")
+        logger.error("=" * 50)
+        raise Exception(f"Repository '{repo_id}' does not exist and could not be created. Please create it manually or use your personal username.")
+    
     logger.info("Uploading model...")
     try:
         api.upload_folder(
@@ -80,8 +127,17 @@ def push_to_hub(
             repo_id=repo_id,
             commit_message=commit_message,
         )
-        logger.info(f"Model uploaded successfully to {repo_id}")
+        logger.info(f"✅ Model uploaded successfully to {repo_id}")
     except Exception as e:
+        error_msg = str(e)
+        if "404" in error_msg or "Not Found" in error_msg:
+            logger.error("=" * 50)
+            logger.error("❌ Repository not found")
+            logger.error("=" * 50)
+            logger.error("The repository doesn't exist. Please:")
+            logger.error("1. Create it manually at https://huggingface.co/new")
+            logger.error(f"2. Or use your personal username: YOUR-USERNAME/{repo_id.split('/')[-1]}")
+            logger.error("=" * 50)
         logger.error(f"Failed to upload model: {e}")
         raise
     

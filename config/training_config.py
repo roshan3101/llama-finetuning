@@ -130,6 +130,7 @@ def get_training_config_for_model_size(
                 base_config.dataloader_pin_memory = True  # Faster GPU transfer
                 base_config.gradient_checkpointing = False  # Disable for speed (plenty of memory)
                 base_config.logging_steps = 20  # Less frequent logging to reduce overhead
+                base_config.save_steps = 200  # Align with eval_steps
                 base_config.eval_steps = 200  # Less frequent eval to reduce overhead
             elif model_size == "1B":
                 base_config.per_device_train_batch_size = 64  # Massive batch for 1B
@@ -142,6 +143,7 @@ def get_training_config_for_model_size(
                 base_config.dataloader_num_workers = 16
                 base_config.gradient_checkpointing = False  # Disable for speed
                 base_config.logging_steps = 20
+                base_config.save_steps = 200  # Align with eval_steps
                 base_config.eval_steps = 200
             elif model_size == "70B":
                 base_config.per_device_train_batch_size = 4  # Large batch even for 70B
@@ -154,6 +156,7 @@ def get_training_config_for_model_size(
                 base_config.dataloader_num_workers = 16
                 base_config.gradient_checkpointing = False  # Disable for speed
                 base_config.logging_steps = 20
+                base_config.save_steps = 200  # Align with eval_steps
                 base_config.eval_steps = 200
         elif gpu_memory_gb >= 40:  # A100 40GB (standard high performance)
             # Optimize for A100 with high RAM
